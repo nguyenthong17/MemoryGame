@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, StyleSheet, Alert, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  FlatList,
+  useWindowDimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import Title from "../components/ui/Title";
@@ -26,6 +32,9 @@ function Game({ userNumber, onGameOver }) {
   const initialGuess = generateRandomBetween(1, 100, userNumber);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
   const [guessRounds, setGuessRounds] = useState([initialGuess]);
+
+  const { width, height } = useWindowDimensions();
+
   useEffect(() => {
     if (currentGuess === userNumber) {
       onGameOver(guessRounds.length);
@@ -64,9 +73,8 @@ function Game({ userNumber, onGameOver }) {
 
   const guessRoundListLength = guessRounds.length;
 
-  return (
-    <View style={styles.screen}>
-      <Title> Opponet's Guess</Title>
+  let content = (
+    <>
       <NumberContainer>{currentGuess}</NumberContainer>
       <Card>
         <InstructionText style={styles.instructionText}>
@@ -85,6 +93,41 @@ function Game({ userNumber, onGameOver }) {
           </View>
         </View>
       </Card>
+    </>
+  );
+  const marginBottomDistance = width > 500 ? 0 : 20;
+  if (width > 500) {
+    content = (
+      <>
+        <InstructionText
+          style={[
+            styles.instructionText,
+            { marginBottom: marginBottomDistance },
+          ]}
+        >
+          Higher or Lower?
+        </InstructionText>
+        <View style={styles.buttonContainterWide}>
+          <View style={styles.button}>
+            <PrimaryButton onPress={nextGuessHandler.bind(this, "lower")}>
+              <Ionicons name="md-remove" size={24} color="white" />
+            </PrimaryButton>
+          </View>
+          <NumberContainer>{currentGuess}</NumberContainer>
+          <View style={styles.button}>
+            <PrimaryButton onPress={nextGuessHandler.bind(this, "higher")}>
+              <Ionicons name="md-add" size={24} color="white" />
+            </PrimaryButton>
+          </View>
+        </View>
+      </>
+    );
+  }
+
+  return (
+    <View style={styles.screen}>
+      <Title> Opponet's Guess</Title>
+      {content}
       {/* <View>Round logs</View> */}
       <View style={styles.roundLog}>
         {/* {guessRounds.map((guessRound) => (
@@ -111,9 +154,14 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     padding: 24,
+    alignItems: "center",
   },
   instructionText: {
     marginBottom: 20,
+  },
+  buttonContainterWide: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -123,6 +171,6 @@ const styles = StyleSheet.create({
   },
   roundLog: {
     flex: 1,
-    padding: 10,
+    padding: 0,
   },
 });
